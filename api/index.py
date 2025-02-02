@@ -5,7 +5,7 @@ from pathlib import Path
 app = FastAPI()
 
 # Load the JSON data
-data_path = Path(__file__).parent.parent / "data.json"
+data_path = Path(__file__).parent.parent / "q-vercel-python.json"
 with open(data_path, "r") as file:
     data = json.load(file)
 
