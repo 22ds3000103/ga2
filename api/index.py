@@ -1,3 +1,4 @@
+# api/index.py
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 import json
@@ -8,10 +9,10 @@ app = FastAPI()
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["GET"],  # Allows only GET requests
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["GET"],
+    allow_headers=["*"],
 )
 
 # Load the JSON data
@@ -19,18 +20,14 @@ data_path = Path(__file__).parent.parent / "q-vercel-python.json"
 with open(data_path, "r") as file:
     data = json.load(file)
 
+# Create a dictionary for O(1) lookup
+marks_dict = {entry["name"]: entry["marks"] for entry in data}
+
 @app.get("/api")
 async def get_marks(name: list[str] = Query(None)):
     if not name:
         return {"marks": []}
     
-    marks = []
-    for student_name in name:
-        mark = None
-        for entry in data:
-            if entry["name"] == student_name:
-                mark = entry["marks"]
-                break
-        marks.append(mark if mark is not None else 0)
-    
+    # Get marks in the exact order of requested names
+    marks = [marks_dict.get(student_name, 0) for student_name in name]
     return {"marks": marks}
